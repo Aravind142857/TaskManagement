@@ -10,7 +10,13 @@ RUN dotnet restore
 COPY . .
 RUN dotnet publish -c Release -o /app/publish
 
-# Second stage: Run the application
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS migration
+WORKDIR /app
+COPY --from=build /app ./
+
+RUN dotnet ef database update
+
+# Third stage: Run the application
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .

@@ -22,7 +22,7 @@ namespace backend.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("backend.Models.Task", b =>
+            modelBuilder.Entity("backend.Types.Task", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

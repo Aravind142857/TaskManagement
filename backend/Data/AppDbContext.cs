@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using backend.Models;
+using backend.Types;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
@@ -15,7 +15,7 @@ namespace backend.Data {
         //     optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Initial Catalog=DBName;Integrated Security=True");
         // }
 
-        public DbSet<backend.Models.Task> Tasks { get; set; }
+        public DbSet<backend.Types.Task> Tasks { get; set; }
         // public DbSet<User> Users { get; set; }
     }
 }
