@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "lzpmtMB7+Tg=",
+  "dgSpecHash": "0iOlt/4Ny0g=",
   "success": true,
   "projectFilePath": "/Users/aravind/Tasks and Productivity/backend/backend.csproj",
   "expectedPackageFiles": [
+    "/Users/aravind/.nuget/packages/bcrypt.net-next/4.0.3/bcrypt.net-next.4.0.3.nupkg.sha512",
     "/Users/aravind/.nuget/packages/chillicream.nitro.app/20.0.2/chillicream.nitro.app.20.0.2.nupkg.sha512",
     "/Users/aravind/.nuget/packages/greendonut/14.1.0/greendonut.14.1.0.nupkg.sha512",
     "/Users/aravind/.nuget/packages/hotchocolate/14.1.0/hotchocolate.14.1.0.nupkg.sha512",

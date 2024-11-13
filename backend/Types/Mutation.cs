@@ -5,7 +5,7 @@ namespace backend.Types
 {
     public class Mutation
     {
-        public async System.Threading.Tasks.Task<backend.Types.Task> CreateTask([Service] AppDbContext context, backend.Types.TaskInput input)
+        public async System.Threading.Tasks.Task<backend.Types.Task> CreateTask([Service] AppDbContext context, backend.Types.NewTaskInput input)
         {
             DateTime parsedDueDate;
             if (!DateTime.TryParse(input.DueDate, out parsedDueDate))
@@ -14,26 +14,32 @@ namespace backend.Types
             }
             DateTime dueDateUtc = parsedDueDate.ToUniversalTime();
             var task = new backend.Types.Task(){
-                Id = input.Id, Title = input.Title, Description = input.Description, DueDate = dueDateUtc, Priority = input.Priority, isCompleted = input.isCompleted};
+                Title = input.Title, Description = input.Description, DueDate = dueDateUtc, Priority = input.Priority, isCompleted = input.isCompleted};
             context.Tasks.Add(task);
             await context.SaveChangesAsync();
             return task;
         }
-        public async System.Threading.Tasks.Task<backend.Types.Task> UpdateTask([Service] AppDbContext context, int id, backend.Types.Task updatedtask)
+        public async System.Threading.Tasks.Task<backend.Types.Task> UpdateTask([Service] AppDbContext context, [ID] Guid id, backend.Types.NewTaskInput updatedTask)
         {
             var task = await context.Tasks.FindAsync(id);
             if (task != null)
             {
-                task.Title = updatedtask.Title;
-                task.Description = updatedtask.Description;
-                task.DueDate = updatedtask.DueDate;
-                task.Priority = updatedtask.Priority;
-                task.isCompleted = updatedtask.isCompleted;
+                DateTime parsedDueDate;
+                if (!DateTime.TryParse(updatedTask.DueDate, out parsedDueDate))
+                {
+                    throw new ArgumentException("Invalid date format. Please use a valid DateTime string");
+                }
+                DateTime dueDateUtc = parsedDueDate.ToUniversalTime();
+                task.Title = updatedTask.Title;
+                task.Description = updatedTask.Description;
+                task.DueDate = dueDateUtc;
+                task.Priority = updatedTask.Priority;
+                task.isCompleted = updatedTask.isCompleted;
                 await context.SaveChangesAsync();
             }
             return task;
         }
-        public async System.Threading.Tasks.Task<bool> DeleteTask([Service] AppDbContext context, int id)
+        public async System.Threading.Tasks.Task<bool> DeleteTask([Service] AppDbContext context, [ID] Guid id)
         {
             var task = await context.Tasks.FindAsync(id);
             if (task != null)
@@ -43,6 +49,16 @@ namespace backend.Types
                 return true;
             }
             return false;
+        }
+        public async System.Threading.Tasks.Task<backend.Types.Task> ToggleTaskCompletion([Service] AppDbContext context, [ID] Guid id, bool isCompleted)
+        {
+            var task = await context.Tasks.FindAsync(id);
+            if (task != null)
+            {
+                task.isCompleted = !task.isCompleted;
+                await context.SaveChangesAsync();
+            }
+            return task;
         }
     }
 }

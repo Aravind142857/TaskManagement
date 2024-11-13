@@ -5,13 +5,10 @@ using System.Threading.Tasks;
 
 namespace backend.Types
 {
-    [GraphQLName("Input for Task")]
     [GraphQLDescription("Definition of a task")]
-    public class TaskInput
+    public class NewTaskInput
     {
-        [ID]
-        public int Id {get; set;}
-
+        public Guid? Id {get; set;}
         [GraphQLDescription("The title of the task")]
         public required string Title {get; set;}
 
@@ -22,11 +19,11 @@ namespace backend.Types
         public required string DueDate {get; set;}
 
         [GraphQLDescription("Priority level of the task")]
-        public int Priority {get; set;}
+        public required int Priority {get; set;}
 
         [GraphQLDescription("Completion status of the task")]
         public required bool isCompleted {get; set;}
-        public TaskInput(int id, string title, string description, string dueDate, int priority, bool iscompleted)
+        public NewTaskInput(Guid? id, string title, string description, string dueDate, int priority, bool iscompleted)
         {
             Id = id;
             Title = title;

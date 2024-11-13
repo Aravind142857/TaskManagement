@@ -13,21 +13,23 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowFrontend", 
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod();
+        });
+});
+// builder.Services.AddControllers();
 builder.Services
     .AddGraphQLServer()
     .AddQueryType<Query>()
     .AddType<backend.Types.Task>()
     .AddMutationType<Mutation>()
-    .AddInputObjectType<backend.Types.TaskInput>();
-// builder.Services.AddCors(options => {
-//     options.AddDefaultPolicy(builder => {
-//         builder
-//             .WithOrigins("")
-//     })
-// })
-// builder.Services.AddControllers();
+    .AddInputObjectType<backend.Types.NewTaskInput>();
 
 var app = builder.Build();
+app.UseCors("AllowFrontend");
 app.Urls.Add("http://0.0.0.0:80");
 using (var scope = app.Services.CreateScope())
 {

@@ -8,21 +8,24 @@ namespace backend.Types
     [GraphQLDescription("Definition of a task")]
     public class Task
     {
-        [ID]
-        public int Id {get; set;}
+        public Guid Id {get; set;} = Guid.NewGuid();
 
+        [GraphQLNonNullType]
         [GraphQLDescription("The title of the task")]
         public required string Title {get; set;}
 
+        [GraphQLNonNullType]
         [GraphQLDescription("Detailed description of the task")]
         public required string Description {get; set;}
 
         [GraphQLDescription("Due date of the task")]
-        public DateTime DueDate {get; set;}
+        public DateTime? DueDate {get; set;}
 
+        [GraphQLNonNullType]
         [GraphQLDescription("Priority level of the task")]
-        public int Priority {get; set;}
+        public required int Priority {get; set;}
 
+        [GraphQLNonNullType]
         [GraphQLDescription("Completion status of the task")]
         public required bool isCompleted {get; set;}
         // public Task(int id, string title, string description, DateTime dueDate, int priority, bool iscompleted)
