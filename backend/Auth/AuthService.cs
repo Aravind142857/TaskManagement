@@ -23,7 +23,7 @@ namespace backend.Auth
             {
                 Username = input.Username,
                 Email = input.Email,
-                passwordHash = passwordHash
+                PasswordHash = passwordHash
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -36,7 +36,7 @@ namespace backend.Auth
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(Claimtypes.Email, user.Email)
+                new Claim(ClaimTypes.Email, user.Email)
             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -47,7 +47,7 @@ namespace backend.Auth
                 expires: DateTime.Now.AddMinutes(Convert.ToDouble(_configuration["JwtSettings:ExpiryInMinutes"])),
                 signingCredentials: creds
             );
-            return new JwtSecurityToHandler().WriteToken(token);
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

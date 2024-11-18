@@ -9,6 +9,6 @@ namespace backend.Auth
     );
     public record UserLoginInput (
         [GraphQLNonNullType] string Email,
-        [GraphQLNonNullType] string Password,
+        [GraphQLNonNullType] string Password
     );
 }

@@ -16,6 +16,6 @@ namespace backend.Data {
         // }
 
         public DbSet<backend.Types.Task> Tasks { get; set; }
-        // public DbSet<User> Users { get; set; }
+        public DbSet<backend.Auth.User> Users { get; set; }
     }
 }
