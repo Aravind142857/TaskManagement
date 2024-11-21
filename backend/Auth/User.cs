@@ -1,6 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-
+using backend.Types;
 namespace backend.Auth
 {
     public class User
@@ -12,6 +13,7 @@ namespace backend.Auth
         public required string Email {get; set;}
         [Required]
         public required string PasswordHash {get; set;}
+        public ICollection<backend.Types.UserTasks> UserTasks {get; set;} = new List<backend.Types.UserTasks>();
 
     }
 }

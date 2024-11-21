@@ -61,6 +61,7 @@ builder.Services
     .AddInputObjectType<backend.Auth.UserRegisterInput>()
     .AddInputObjectType<backend.Types.NewTaskInput>()
     .AddType<backend.Types.Task>()
+    .AddType<backend.Types.UserTasks>()
     .AddType<backend.Auth.User>();
     
     

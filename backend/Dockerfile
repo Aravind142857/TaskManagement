@@ -10,11 +10,11 @@ RUN dotnet restore
 COPY . .
 RUN dotnet publish -c Release -o /app/publish --no-restore
 
-# FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS migration
-# WORKDIR /app
-# COPY --from=build /app ./
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS migration
+WORKDIR /app
+COPY --from=build /app ./
 
-# RUN dotnet ef database update
+RUN dotnet ef database update
 
 # Third stage: Run the application
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS runtime

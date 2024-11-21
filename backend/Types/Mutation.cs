@@ -4,6 +4,14 @@ using backend.Auth;
 using Microsoft.Extensions.Logging;
 namespace backend.Types
 {
+    public class RegisterResponse
+    {
+        [GraphQLNonNullType]
+        public string Token { get; set; }
+
+        [GraphQLNonNullType]
+        public Guid UserId { get; set; }
+    }
     public class Mutation
     {
         private readonly ILogger<Mutation> _logger;
@@ -13,7 +21,7 @@ namespace backend.Types
             _logger = logger;
             _authService = authService;
         }
-        public async System.Threading.Tasks.Task<backend.Types.Task> CreateTask([Service] AppDbContext context, backend.Types.NewTaskInput input)
+        public async System.Threading.Tasks.Task<backend.Types.Task> CreateTask([Service] AppDbContext context, backend.Types.NewTaskInput input, Guid userId)
         {
             _logger.LogInformation("CreateTask mutation started");
             DateTime parsedDueDate;
@@ -22,9 +30,20 @@ namespace backend.Types
                 throw new ArgumentException("Invalid date format. Please use a valid DateTime string");
             }
             DateTime dueDateUtc = parsedDueDate.ToUniversalTime();
-            var task = new backend.Types.Task(){
-                Title = input.Title, Description = input.Description, DueDate = dueDateUtc, Priority = input.Priority, isCompleted = input.isCompleted};
+
+            var task = new backend.Types.Task()
+            {
+                Title = input.Title, Description = input.Description, DueDate = dueDateUtc, Priority = input.Priority, isCompleted = input.isCompleted
+            };
             context.Tasks.Add(task);
+            await context.SaveChangesAsync();
+            var userTask = new backend.Types.UserTasks()
+            {
+                TaskId = task.Id,
+                UserId = userId
+            };
+            context.UserTasks.Add(userTask);
+
             await context.SaveChangesAsync();
             return task;
         }
@@ -75,13 +94,17 @@ namespace backend.Types
         //     await context.SaveChangesAsync();
         //     return "Registered user ...";
         // }
-        public async System.Threading.Tasks.Task<string> Register([Service] AppDbContext context, UserRegisterInput input)
+        public async System.Threading.Tasks.Task<RegisterResponse> Register([Service] AppDbContext context, UserRegisterInput input)
         {
             try {
                 _logger.LogInformation("Registering user with email {Email} and username {Username}", input.Email, input.Username);
                 var user = await _authService.Register(input);
                 _logger.LogInformation("User registered successfully with ID {UserId}", user.Id);
-                return _authService.GenerateJwtToken(user);
+                return new RegisterResponse
+                {
+                    Token = _authService.GenerateJwtToken(user),
+                    UserId = user.Id
+                };
             } catch (Exception ex)
             {
                 _logger.LogError(ex, "Error registering user with email {Email} and username {Username}", input.Email, input.Username);
