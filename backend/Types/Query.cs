@@ -10,7 +10,15 @@ namespace backend.Types
 {
     public class Query
     {
-        public IQueryable<backend.Types.Task> GetTasks(AppDbContext context)
+        [UseFiltering]
+        [UseSorting]
+        public IQueryable<backend.Types.Task> GetTasks([Service] AppDbContext context, string userId) {
+            if (Guid.TryParse(userId, out Guid userGuid)) {
+                return context.Tasks.Include(t => t.UserTasks).Where(t => t.UserTasks.Any(ut => ut.UserId == userGuid));
+            }
+            throw new ArgumentException("Invalid user id");
+        }
+        public IQueryable<backend.Types.Task> GetAllTasks(AppDbContext context)
         {
             return context.Tasks.Include(t => t.UserTasks).ThenInclude(ut => ut.User);
         }
@@ -24,5 +32,6 @@ namespace backend.Types
                 .Include(ut => ut.User)
                 .Include(ut => ut.Task);
         }
+
     }
 }

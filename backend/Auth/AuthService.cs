@@ -7,27 +7,40 @@ using System.Text;
 using BCrypt.Net;
 namespace backend.Auth
 {
-    public class AuthService
+    public class AuthService(AppDbContext context, IConfiguration configuration, ILogger<AuthService> logger)
     {
-        private readonly AppDbContext _context;
-        private readonly IConfiguration _configuration;
-        public AuthService(AppDbContext context, IConfiguration configuration)
-        {
-            _context = context;
-            _configuration = configuration;
-        }
+        private readonly AppDbContext _context = context;
+        private readonly IConfiguration _configuration = configuration;
+        private readonly ILogger<AuthService> _logger = logger;
+
         public async Task<User> Register(UserRegisterInput input)
         {
+            try {
+                _logger.LogInformation("Attempting to find a user with provided username or email");
+            var existingUser =  _context.Users.SingleOrDefault(u => u.Email == input.Email || u.Username == input.Username);
+            if (existingUser != null)
+            {
+                // You could throw a more specific exception here
+                throw new Exception("User with the same email or username already exists.");
+            }
+            // Reaches this point. TODO: Add more debug statements below
+            _logger.LogInformation("Could not find a user with provided username or email");
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(input.Password);
+            _logger.LogInformation("Hashed the password into {hashPassword}", passwordHash);
             var user = new User
             {
                 Username = input.Username,
                 Email = input.Email,
                 PasswordHash = passwordHash
             };
+            _logger.LogInformation("Created user with provided credentials");
             _context.Users.Add(user);
+            _logger.LogInformation("Added user to users");
             await _context.SaveChangesAsync();
             return user;
+            } catch (Exception ex) {
+                throw new GraphQLException("An error occured during registration. {}", ex);
+            }
         }
 
         public string GenerateJwtToken(User user)

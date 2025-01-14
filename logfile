@@ -1,0 +1,15 @@
+2025-01-02 22:34:05.803 CST [89610] LOG:  starting PostgreSQL 14.13 (Homebrew) on aarch64-apple-darwin23.4.0, compiled by Apple clang version 15.0.0 (clang-1500.3.9.4), 64-bit
+2025-01-02 22:34:05.805 CST [89610] LOG:  listening on IPv6 address "::1", port 5432
+2025-01-02 22:34:05.805 CST [89610] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2025-01-02 22:34:05.806 CST [89610] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2025-01-02 22:34:05.814 CST [89611] LOG:  database system was interrupted; last known up at 2024-11-07 18:30:28 CST
+2025-01-02 22:34:05.943 CST [89611] LOG:  database system was not properly shut down; automatic recovery in progress
+2025-01-02 22:34:05.947 CST [89611] LOG:  redo starts at 1/3824C940
+2025-01-02 22:34:05.947 CST [89611] LOG:  invalid record length at 1/3824CA28: wanted 24, got 0
+2025-01-02 22:34:05.947 CST [89611] LOG:  redo done at 1/3824C9F0 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2025-01-02 22:34:05.953 CST [89610] LOG:  database system is ready to accept connections
+2025-01-02 22:34:09.564 CST [89635] FATAL:  role "postgres" does not exist
+2025-01-02 22:34:26.406 CST [89645] FATAL:  database "aravind" does not exist
+2025-01-02 22:38:41.692 CST [89765] FATAL:  database "admin0" does not exist
+2025-01-02 22:39:58.307 CST [89729] ERROR:  column "admin0" does not exist at character 8
+2025-01-02 22:39:58.307 CST [89729] STATEMENT:  select admin0 as role;

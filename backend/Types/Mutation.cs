@@ -2,9 +2,19 @@ using backend.Data;
 using HotChocolate;
 using backend.Auth;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.SignalR;
+using backend.Hubs;
 namespace backend.Types
 {
     public class RegisterResponse
+    {
+        [GraphQLNonNullType]
+        public string Token { get; set; }
+
+        [GraphQLNonNullType]
+        public Guid UserId { get; set; }
+    }
+    public class LoginResponse
     {
         [GraphQLNonNullType]
         public string Token { get; set; }
@@ -21,8 +31,10 @@ namespace backend.Types
             _logger = logger;
             _authService = authService;
         }
-        public async System.Threading.Tasks.Task<backend.Types.Task> CreateTask([Service] AppDbContext context, backend.Types.NewTaskInput input, Guid userId)
+        public async System.Threading.Tasks.Task<backend.Types.Task> CreateTask([Service] AppDbContext context, backend.Types.NewTaskInput input, string userId)
         {
+            if (Guid.TryParse(userId, out Guid guid))
+            {
             _logger.LogInformation("CreateTask mutation started");
             DateTime parsedDueDate;
             if (!DateTime.TryParse(input.DueDate, out parsedDueDate))
@@ -40,15 +52,21 @@ namespace backend.Types
             var userTask = new backend.Types.UserTasks()
             {
                 TaskId = task.Id,
-                UserId = userId
+                UserId = guid
             };
             context.UserTasks.Add(userTask);
 
             await context.SaveChangesAsync();
             return task;
+            }
+            else
+            {
+                throw new ArgumentException("");
+            }
         }
-        public async System.Threading.Tasks.Task<backend.Types.Task> UpdateTask([Service] AppDbContext context, [ID] Guid id, backend.Types.NewTaskInput updatedTask)
+        public async System.Threading.Tasks.Task<backend.Types.Task> UpdateTask([Service] AppDbContext context, [Service] IHubContext<CollaborationHub> hubContext , [ID] Guid id, backend.Types.NewTaskInput updatedTask)
         {
+            // TODO: Find the task based on userId
             var task = await context.Tasks.FindAsync(id);
             if (task != null)
             {
@@ -64,11 +82,13 @@ namespace backend.Types
                 task.Priority = updatedTask.Priority;
                 task.isCompleted = updatedTask.isCompleted;
                 await context.SaveChangesAsync();
+                await hubContext.Clients.All.SendAsync("TaskUpdated", id, task);
             }
             return task;
         }
         public async System.Threading.Tasks.Task<bool> DeleteTask([Service] AppDbContext context, [ID] Guid id)
         {
+            // TODO: Find the task based on userId
             var task = await context.Tasks.FindAsync(id);
             if (task != null)
             {
@@ -80,6 +100,7 @@ namespace backend.Types
         }
         public async System.Threading.Tasks.Task<backend.Types.Task> ToggleTaskCompletion([Service] AppDbContext context, [ID] Guid id, bool isCompleted)
         {
+            // TODO: Find the task based on userId
             var task = await context.Tasks.FindAsync(id);
             if (task != null)
             {
@@ -117,15 +138,34 @@ namespace backend.Types
         //     await context.SaveChangesAsync();
         //     return "Logged in user ...";
         // }
-        public async System.Threading.Tasks.Task<string> Login(UserLoginInput input, [Service] AppDbContext context)
+        public async System.Threading.Tasks.Task<LoginResponse> Login(UserLoginInput input, [Service] AppDbContext context)
         {
             var user = context.Users.SingleOrDefault(u => u.Email == input.Email);
+            _logger.LogInformation("Found a user with {}", user?.Email);
+            _logger.LogInformation("Login user");
             if (user == null || !BCrypt.Net.BCrypt.Verify(input.Password, user.PasswordHash))
             {
                 throw new GraphQLException("Invalid email or password");
             }
+            
             await System.Threading.Tasks.Task.Delay(1000);
-            return _authService.GenerateJwtToken(user);
+            return new LoginResponse
+            {
+                Token = _authService.GenerateJwtToken(user),
+                UserId = user.Id
+            };
         }
+        public async System.Threading.Tasks.Task<bool> DeleteUser([Service] AppDbContext context, [ID] Guid id)
+        {
+            var user = await context.Users.FindAsync(id);
+            if (user != null)
+            {
+                context.Users.Remove(user);
+                await context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
+       
     }
 }

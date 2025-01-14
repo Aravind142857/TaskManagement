@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using HotChocolate;
+using backend.Hubs;
 Thread.Sleep(10000);
 ThreadPool.SetMinThreads(50, 50);
 var builder = WebApplication.CreateBuilder(args);
@@ -19,10 +20,11 @@ builder.Services.AddCors(options => {
             policy.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
         });
 });
+builder.Services.AddSignalR();
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
-builder.Logging.SetMinimumLevel(LogLevel.Trace);
+builder.Logging.SetMinimumLevel(LogLevel.Debug);
 // Add services to the container.
 // Configure DbContext to use PostgreSQL, connecting to the database specified in appsettings.json
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -62,7 +64,9 @@ builder.Services
     .AddInputObjectType<backend.Types.NewTaskInput>()
     .AddType<backend.Types.Task>()
     .AddType<backend.Types.UserTasks>()
-    .AddType<backend.Auth.User>();
+    .AddType<backend.Auth.User>()
+    .AddFiltering()
+    .AddSorting();
     
     
 
@@ -88,6 +92,7 @@ using (var scope = app.Services.CreateScope())
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapGraphQL();
+    endpoints.MapHub<CollaborationHub>("/collaborationHub");
 });
 app.Urls.Add("http://0.0.0.0:80");
 // app.UseHttpsRedirection();
